@@ -12,7 +12,7 @@
 <script>
 import BScroll from "better-scroll"
 import { addClass } from '../../common/js/dom.js'
-import { clearInterval } from 'timers';
+// import { clearInterval } from 'timers';
 export default {
   data () {
     return {

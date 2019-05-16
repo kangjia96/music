@@ -27,6 +27,7 @@ export function getDiscList() {
     format: 'json',
     needNewCode: 0,
     categoryId: 10000000,
+    g_tk: 1928093487,
     rnd: Math.random(),
   })
 

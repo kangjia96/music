@@ -20,6 +20,6 @@ function param(data) { //拼接数据
     let val = data[key] !== undefined ? data[key] : ""
     url += `&${key}=${encodeURIComponent(val)}`
   }
-  // console.log(url)
+  console.log(data)
   return url ? url.substring(1) : ''
 }
