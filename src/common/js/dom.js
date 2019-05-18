@@ -18,6 +18,7 @@ export function getData(el, name, val) {
   if (val) {
     return el.setAttribute(name, val)
   } else {
+    // console.log(el, name)
     return el.getAttribute(name)
   }
 }

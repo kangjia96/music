@@ -13,6 +13,17 @@ module.exports = {
         pathRewrite: {
           '^/api/getDiscList': ''
         }
+      },
+      '/api/getMusicUrl': {
+        target: 'https://u.y.qq.com/cgi-bin/musicu.fcg',
+        changeOrigin: true,
+        onProxyReq (proxyReq, req, res) {
+          proxyReq.setHeader('origin', 'y.y.qq.com');
+          proxyReq.setHeader('referer', 'https://y.qq.com/portal/player.html');
+        },
+        pathRewrite: {
+          '^/api/getMusicUrl': ''
+        }
       }
     }
   }

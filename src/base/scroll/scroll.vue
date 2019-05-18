@@ -43,6 +43,7 @@
         if (this.listenScroll) { //监听滚动事件
           let me = this
           this.scroll.on('scroll', pos => {
+            // console.log(pos)
             me.$emit('scroll', pos)
           })
         }

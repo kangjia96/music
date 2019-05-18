@@ -11,7 +11,7 @@
           {{group.title}}
         </h2>
           <ul>
-            <li v-for="item in group.items" :key="item.id" class="list-item">
+            <li @click="selectItem(item)" v-for="item in group.items" :key="item.id" class="list-item">
               <img class="singer-avatar" v-lazy="item.avatar" />
               <span class="singer-name">{{item.name}}</span>
             </li>
@@ -29,20 +29,29 @@
         </li>
       </ul>
     </div>
+    <div :class="{'list-fixed': ScrollY <= 0}" ref="fixed">
+      <h1 class="fixed-title">{{fixedTitle}}</h1>
+    </div>
+    <div class="loading-container" v-show="!data.length">
+      <Loading />
+    </div>
   </Scroll>
 </template>
 
 <script>
   import Scroll from '../scroll/scroll'
   import { getData } from '../../common/js/dom.js'
+  import Loading from "../loading/loading"
 
   const ANCHAR_HEIGHT = 18
+  const TITLE_HEIGHT = 30
 
   export default {
     data() {
       return {
         ScrollY: -1,
-        currentIndex: 0
+        currentIndex: 0,
+        diff: -1
       }
     },
     created() {
@@ -63,33 +72,60 @@
         return this.data.map(group => {
           return group.title.substr(0, 1)
         })
+      },
+      fixedTitle() {
+        if (this.ScrollY > 0) {
+          return
+        }
+        return this.data[this.currentIndex] ? this.data[this.currentIndex].title : ''
       }
     },
     methods: {
+      selectItem(item) {
+        this.$emit('select', item) //派发出去
+      },
       onShortcutTouchStart(e) {
         let anchorIndex = getData(e.target, 'index')
+        //得到dom元素的属性值
         let firstTouch = e.touches[0]
         this.touch.y1 = firstTouch.pageY
         this.touch.anchorIndex = anchorIndex
+        //将开始触摸的值和获取的index值储存
         this._scrollTo(anchorIndex)
+        //歌手列表联动跳转到相同下标位置
       },
       onShortcutTouchmove(e) {
         let firstTouch = e.touches[0]
         this.touch.y2 = firstTouch.pageY
         let delta = (this.touch.y2 - this.touch.y1) / ANCHAR_HEIGHT | 0
         let anchorIndex = +this.touch.anchorIndex + delta
-        // console.log(anchorIndex)
+        // console.log(this.touch)
         this._scrollTo(anchorIndex)
       },
       scroll(pos) {
+        //监听滚动事件 将ScrollY赋值
         this.ScrollY = pos.y
-        console.log(pos.y)
       },
       _scrollTo(index) {
+        if (index === null) {
+          //处理顶部和底部的边缘情况
+          return
+        }
+
+        if (index < 0) {
+          //拖动超出顶部 < 0
+          index = 0
+        } else if (index > this.listHeight.length - 2) {
+          //拖动超出底部
+          index = this.listHeight.length - 2
+        }
+        this.ScrollY = -this.listHeight[index]
         this.$refs.listview.scrollToElement(this.$refs.listGroup[index], 0)
       },
       _calculateHeight() {
+        // 清空
         this.listHeight = []
+        // console.log('run')
         const list = this.$refs.listGroup
         //拿到所有分类dom元素的实例
         let height = 0
@@ -104,34 +140,50 @@
       }
     },
     watch: {
-      data() {
-        setTimeout(() => {
-          // console.log('run')
-          this._calculateHeight()
-        }, 20)
-      },
       ScrollY(newY) {
-        // 保留listHeight
-        if (newY >= 0) {
+        //观察ScrollY变化 即scroll事件
+        //当滚动到顶部向上 newY是大于0的
+        this._calculateHeight()
+
+        if (newY > 0) {
           this.currentIndex = 0
           return
         }
+        // 保留listHeight
         const listHeight = this.listHeight
+        // 遍历listHeight 判断一个元素的滚动高度是否符合listHeight的任意相邻的两元素的上下限 符合就将currentIndex 设为数组的下标
         // console.log(listHeight)
-        // 遍历listHeight 判断一个元素的
         for (let i = 0; i < listHeight.length; i++) {
           let height1 = listHeight[i]
           let height2 = listHeight[i + 1]
-          if (!height2 || (-newY > height1 && -newY < height2)) {
+          // console.log(height1, height2)
+          //滚动在顶部以下
+          if (-newY >= height1 && -newY < height2) {
             this.currentIndex = i
-            // console.log(this.currentIndex)
+
+            this.diff = height2 + newY
+            //通过移动进行计算上移与下一个索引的距离
+            // console.log('newY:', newY, 'height:', height2)
+            // 右边小下标索引联动
             return
           }
         }
+      },
+      diff(newVal) {
+        let fixedTop = (newVal > 0 && newVal < TITLE_HEIGHT) ? newVal - TITLE_HEIGHT : 0
+        //通过差距计算需要移动的距离
+        console.log(fixedTop)
+        if (this.fixedTop === fixedTop) {
+          return
+        }
+        console.log(fixedTop, this.fixedTop)
+        this.fixedTop = fixedTop
+        this.$refs.fixed.style.transform = `translate3d(0, ${fixedTop}px, 0)`
       }
     },
     components: {
       Scroll,
+      Loading,
     },
   }
 </script>
@@ -189,7 +241,7 @@
     position: absolute
     width: 100%
     top: -1px
-    .fixedtitle
+    .fixed-title
       width: 100%
       height: 30px
       line-height: 30px
