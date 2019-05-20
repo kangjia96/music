@@ -25,3 +25,27 @@ export function getMusicUrl (songmid) { //请求歌曲的url
     return Promise.resolve(res.data)
   })
 }
+
+export function getMusicLyric(songmid) {
+  const url = '/api/getMusicLyric'
+  const data = Object.assign({}, commonParams, {
+    '-': 'MusicJsonCallback_lrc',
+    pcachetime: +new Date(),
+    songmid: songmid,
+    g_tk: 1186940298,
+    loginUin: 1477129230,
+    hostUin: 0,
+    format: 'json',
+    inCharset: 'utf8',
+    outCharset: 'utf - 8',
+    notice: 0,
+    platform: 'yqq.json',
+    needNewCode: 0
+  })
+
+  return Axios.get(url, {
+    params: data
+  }).then(res => {
+    return Promise.resolve(res.data)
+  })
+}

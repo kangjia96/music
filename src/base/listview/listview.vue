@@ -81,6 +81,9 @@
       }
     },
     methods: {
+      refresh() {
+        this.$refs.listview.refresh()
+      },
       selectItem(item) {
         this.$emit('select', item) //派发出去
       },
@@ -172,11 +175,11 @@
       diff(newVal) {
         let fixedTop = (newVal > 0 && newVal < TITLE_HEIGHT) ? newVal - TITLE_HEIGHT : 0
         //通过差距计算需要移动的距离
-        console.log(fixedTop)
+        // console.log(fixedTop)
         if (this.fixedTop === fixedTop) {
           return
         }
-        console.log(fixedTop, this.fixedTop)
+        // console.log(fixedTop, this.fixedTop)
         this.fixedTop = fixedTop
         this.$refs.fixed.style.transform = `translate3d(0, ${fixedTop}px, 0)`
       }

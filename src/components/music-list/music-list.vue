@@ -6,7 +6,7 @@
     <h1 class="title" v-html="title"></h1>
     <div class="bg-image" :style="bgStyle" ref="bgImage">
       <div class="play-wrapper">
-        <div class="play" ref="playBtn" v-show="songs.length > 0">
+        <div class="play" ref="playBtn" v-show="songs.length > 0" @click="random">
           <i class="icon-play"></i>
           <span class="text">随机播放全部</span>
         </div>
@@ -31,10 +31,13 @@
   import Loading from '../../base/loading/loading'
   // import { getMusicUrl } from '../../api/song.js'
   import { mapActions } from 'vuex'
+  import { getPurUrl } from '../../common/js/getSongData'
+  import { playlistMixin } from '../../common/js/mixin'
 
   const RESERVED_HEIGHT = 40
 
   export default {
+    mixins: [playlistMixin], //mixin的应用 store的playlist数据变化就会调用定义的handlePlaylist函数 组件同名方法会覆盖mixins
     props: {
       bgImage: {
         type: String,
@@ -74,6 +77,11 @@
       //对列表的top值进行设置  让图片显示出来
     },
     methods: {
+      handlePlaylist(playlist) {
+        const bottom = playlist.length > 0 ? '60px' : ''
+        this.$refs.list.$el.style.bottom = bottom
+        this.$refs.list.refresh()
+      },
       scroll(pos) {
         // console.log(pos)
         this.scrollY = pos.y
@@ -81,14 +89,34 @@
       back() {
         this.$router.back()
       },
-      selectItem(item, idx){ //选中的歌曲idx
+      async selectItem(song, idx){ //选中的歌曲idx
+        // debugger;
+        let list = await getPurUrl(this.songs, idx)
+
+        // let lyric = await getMLyric(song)
+        // console.log(lyric)
+        // 不能通过下面方式直接修改 songs 直接给store返回一个新的数组
+        // await getMusicUrl(song.mid).then(res => {
+        //   // console.log(res)
+        //   const lurl = res.req.data.freeflowsip[0]
+        //   const purl = res.req_0.data.midurlinfo[0].purl
+        //   const url = lurl + purl
+        //   song.url = url
+        // })
+        // console.log(song.url)
         this.selectPlay({
-          list: this.songs, //整个歌单
+          list: list, //整个歌单
           idx: idx
         })
       },
+      random() {
+        this.randomPlay({
+          list: this.songs,
+        })
+      },
       ...mapActions([
-        'selectPlay'
+        'selectPlay',
+        'randomPlay'
       ])
     },
     watch: {
@@ -98,7 +126,7 @@
         let scale = 1
         let blur = 0
 
-        console.log(this.minTranslateY, newVal)
+        // console.log(this.minTranslateY, newVal)
         this.$refs.layer.style.transform = `translate3d(0, ${translateY}px, 0)`
         const percent = Math.abs(newVal / this.imgHeight)
         if (newVal > 0) {
@@ -126,7 +154,7 @@
         //正常滑动图片z-index为0
         this.$refs.bgImage.style.zIndex = zIndex
         this.$refs.bgImage.style.transform = `scale(${scale})`
-        console.log(zIndex, scale)
+        // console.log(zIndex, scale)
       }
     },
     components: {

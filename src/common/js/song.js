@@ -51,6 +51,7 @@ export function createSong(musicData) { //获取歌曲资料
     duration: musicData.interval,
     url: '',
     image: `https://y.gtimg.cn/music/photo_new/T002R300x300M000${musicData.albummid}.jpg?max_age=2592000`,
+    lyric: '',
   })
 }
 

@@ -1,5 +1,5 @@
 <template>
-  <div class="recommend">
+  <div class="recommend" ref="recommend">
     <Scroll ref="scroll" class="recommend-content" :data="discList">
       <!-- 没有叨叨数据的情况下 会先加载Loading组件 让用户进行等待 -->
       <div>
@@ -40,8 +40,10 @@
   import Scroll from "../../base/scroll/scroll"
   import { getRecommend, getDiscList } from "../../api/recommend"
   import { ERR_OK } from '../../api/config'
+  import { playlistMixin } from '../../common/js/mixin'
 
   export default {
+    mixins: [playlistMixin], //组件同名方法会覆盖mixins
     data() {
       return {
         recommends: [],
@@ -53,6 +55,11 @@
       this._getDiscList()
     },
     methods: {
+      handlePlaylist(playlist) {
+        const bottom = playlist.length > 0 ? '60px' : ''
+        this.$refs.recommend.style.bottom = bottom
+        this.$refs.scroll.refresh()
+      },
       _getRecommend() { //封装jsonp请求 得到数据
         getRecommend().then(res => {
           if (res.code === ERR_OK) {

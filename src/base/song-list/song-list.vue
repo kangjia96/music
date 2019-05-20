@@ -23,8 +23,8 @@
       }
     },
     methods: {
-      selectItem(item, idx){ //选中的歌曲传递下标
-        this.$emit('select', item, idx)
+      selectItem(song, idx){ //选中的歌曲传递下标
+        this.$emit('select', song, idx)
       },
       getDesc(song) {
         // console.log(song)

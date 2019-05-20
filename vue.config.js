@@ -18,11 +18,22 @@ module.exports = {
         target: 'https://u.y.qq.com/cgi-bin/musicu.fcg',
         changeOrigin: true,
         onProxyReq (proxyReq, req, res) {
-          proxyReq.setHeader('origin', 'y.y.qq.com');
+          proxyReq.setHeader('origin', 'https://y.qq.com');
           proxyReq.setHeader('referer', 'https://y.qq.com/portal/player.html');
         },
         pathRewrite: {
           '^/api/getMusicUrl': ''
+        }
+      },
+      '/api/getMusicLyric': {
+        target: 'https://c.y.qq.com/lyric/fcgi-bin/fcg_query_lyric_new.fcg',
+        changeOrigin: true,
+        onProxyReq (proxyReq, req, res) {
+          proxyReq.setHeader('origin', 'https://y.qq.com');
+          proxyReq.setHeader('referer', 'https://y.qq.com/portal/player.html');
+        },
+        pathRewrite: {
+          '^/api/getMusicLyric': ''
         }
       }
     }
