@@ -85,6 +85,7 @@
         this.$refs.listview.refresh()
       },
       selectItem(item) {
+        //点击到的歌手 向上派发事件
         this.$emit('select', item) //派发出去
       },
       onShortcutTouchStart(e) {

@@ -2,6 +2,9 @@
   <div class="song-list">
     <ul>
       <li @click="selectItem(song, idx)" :key="song.mid" v-for="(song, idx) in songs" class="item">
+        <div class="rank" v-show="rank">
+          <span :class="getRankCls(idx)" v-text="getRankText(idx)"></span>
+        </div>
         <div class="content">
           <h2 class="name">
             {{song.name}}
@@ -20,6 +23,10 @@
       songs: {
         type: Array,
         default: null
+      },
+      rank: {
+        type: Boolean,
+        default: false,
       }
     },
     methods: {
@@ -30,6 +37,18 @@
         // console.log(song)
         return `${song.singer}·${song.album}`
       },
+      getRankCls(idx) {
+        if (idx < 3) {
+          return `icon icon${idx}`
+        } else {
+          return 'text'
+        }
+      },
+      getRankText(idx) {
+        if (idx > 2) {
+          return idx + 1
+        }
+      }
     }
   }
 </script>

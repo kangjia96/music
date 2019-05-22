@@ -1,14 +1,16 @@
 import { getMusicUrl, getMusicLyric } from '../../api/song'
 import { ERR_OK } from '../../api/config'
 import { Base64 } from 'js-base64'
-import Lyric from 'lyric-parser'
+// import Lyric from 'lyric-parser'
 
 export async function getPurUrl (playlist, idx) {
-
+  if (idx < 0) {
+    return []
+  }
   let song = playlist[idx]
   if (!song.url) {
     return await getMusicUrl(song.mid).then(res => {
-        console.log('runnnnn')
+        // console.log('runnnnn')
         if (res.code === ERR_OK) {
           const lurl = res.req.data.freeflowsip[0]
           const purl = res.req_0.data.midurlinfo[0].purl
@@ -28,7 +30,7 @@ export async function getPurUrl (playlist, idx) {
         }
       })
   } else {
-    return playlist
+    return playlist.slice()
   }
 
 }

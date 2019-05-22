@@ -15,7 +15,7 @@ class Song {
   }
 }
 
-function filterSinger(singer) {
+export function filterSinger(singer) {
   let res = []
   // console.log(singer)
   if (!singer) {

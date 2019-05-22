@@ -14,7 +14,7 @@
   import { playlistMixin } from '../../common/js/mixin'
 
   const HOT_NAME = "热门"
-  const HOT_SINGER_LEN = 10
+  const HOT_SINGER_LEN = 20
 
 
   export default {
@@ -26,7 +26,7 @@
     },
 
     created() {
-      this._getSingerList()
+      this._getSingerList()//实例创建渲染之后  就需要把数据传给子组件
     },
 
     methods: {
@@ -36,6 +36,7 @@
         this.$refs.list.refresh()
       },
       selectSinger(singer){
+        //监听到select事件 发生路由渲染  sing-detail页面
         this.$router.push({
           path: `/singer/${singer.id}`
         })
@@ -45,8 +46,9 @@
         getSingerList().then(res => {
           if (res.code === ERR_OK) {
             this.singers = this._normalizeSinger(res.data.list)
+            //拿到歌手数据
             // debugger;
-            console.log(this.singers)
+            // console.log(this.singers)
           }
         })
       },
@@ -59,7 +61,8 @@
         }
 
         list.forEach((item, idx) => {
-          if (idx < HOT_SINGER_LEN) {
+          //热门数据筛选
+          if (idx < HOT_SINGER_LEN && idx > 10) {
             map.hot.items.push(new Singer({
               id: item.Fsinger_mid,
               name: item.Fsinger_name,
@@ -67,7 +70,7 @@
           }
 
           const key = item.Findex
-
+          //正常数据
           if (!map[key]) {
             map[key] = {
               title: key,
@@ -81,9 +84,9 @@
           }))
         })
 
-        //为了得到有序的列表 需要处理 map
-        let hot = []
-        let ret = []
+        //为了得到有序的列表 需要处理得到数据map
+        let hot = [] //热门
+        let ret = []  //正常
         for (let key in map) {
           let val = map[key]
           if (val.title.match(/[a-zA-z]/)) {
@@ -92,7 +95,7 @@
             hot.push(val)
           }
         }
-
+        //正常数据进行排序
         ret.sort((a, b) => a.title.charCodeAt(0) - b.title.charCodeAt(0))
         return hot.concat(ret)
       },

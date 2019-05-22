@@ -15,7 +15,20 @@ export function shuffle(arr) { //返回一个新的数组
 }
 
 
-export function findSongIndex(song, newlist) {
+export function findSongIndex(newlist,song) {
   // console.log(song, idx, newlist)
   return newlist.findIndex(it => it.id === song.id)
+}
+
+export function debounce(func, delay) {
+  let timer
+  return function (...args) {
+    if (timer) {
+      clearTimeout(timer)
+    }
+
+    timer = setTimeout(() => {
+      func.apply(this, args)
+    }, delay)
+  }
 }

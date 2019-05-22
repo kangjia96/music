@@ -100,11 +100,12 @@
           <!-- 阻止冒泡 因为父元素有click事件-->
           </ProgressCircle>
         </div>
-        <div class="control">
+        <div class="control" @click.stop="showPlaylist">
           <i  class="icon-playlist"></i>
         </div>
       </div>
     </transition>
+    <PlayList ref="playlist" />
     <audio ref="audio" :src="currentSong.url"
            @canplay="ready" @error="error"
            @timeupdate="updateTime" @ended="end"></audio>
@@ -123,9 +124,11 @@
   import { getMLyric } from '../../common/js/getSongData'
   import Lyric from 'lyric-parser'
   import Scroll from '../../base/scroll/scroll'
-
+  import PlayList from '../playlist/playlist'
+  import { playerMixin } from '../../common/js/mixin'
 
   export default {
+    mixins: [playerMixin],
     data() {
       return {
         songReady: false,
@@ -145,9 +148,6 @@
       },
       playIcon() { //大 控制播放样式
         return this.playing ? 'icon-pause' : 'icon-play'
-      },
-      iconMode() {
-        return this.mode === playMode.sequence ? 'icon-sequence' : this.mode === playMode.loop ? 'icon-loop' : 'icon-random'
       },
       miniIcon() { //同上  小
         return this.playing ? 'icon-pause-mini' : 'icon-play-mini'
@@ -411,6 +411,9 @@
         this.$refs.middlel.style.transitionDuration = '300ms'
 
       },
+      showPlaylist() {
+        this.$refs.playlist.show()
+      },
       _pad(num, n = 2) {//秒数补零
         let len = num.toString().length
         while(len < n) {
@@ -444,7 +447,11 @@
     },
     watch: {
       currentSong(newSong, oldSong) { //当点击时去修改store currentSong也就被修改播放选中歌曲
+        if (!newSong.id) {
+          return
+        }
         if (newSong.id === oldSong.id) {
+          // this.playing()
           return
         }
         // console.log(this.currentSong) //此处监听currentSong的变化进行播放歌曲
@@ -466,7 +473,8 @@
     components: {
       ProgressBar,
       ProgressCircle,
-      Scroll
+      Scroll,
+      PlayList
     }
   }
 </script>

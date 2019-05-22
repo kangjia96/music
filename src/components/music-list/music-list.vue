@@ -16,7 +16,7 @@
     <div class="bg-layer" ref="layer"></div>
     <Scroll @scroll="scroll" :probeType="probeType" :listen-scroll="listenScroll" :data="songs" class="list" ref="list">
       <div class="song-list-wrapper">
-        <SongList :songs="songs" @select="selectItem" />
+        <SongList :rank="rank" :songs="songs" @select="selectItem" />
       </div>
     </Scroll>
     <div class="loading-container" v-show="!songs.length">
@@ -50,6 +50,10 @@
       title: {
         type: String,
         default: ''
+      },
+      rank: {
+        type: Boolean,
+        default: false,
       }
     },
     data(){
@@ -92,7 +96,6 @@
       async selectItem(song, idx){ //选中的歌曲idx
         // debugger;
         let list = await getPurUrl(this.songs, idx)
-
         // let lyric = await getMLyric(song)
         // console.log(lyric)
         // 不能通过下面方式直接修改 songs 直接给store返回一个新的数组

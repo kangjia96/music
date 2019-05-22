@@ -26,7 +26,7 @@
         return this.singer.avatar
       },
       ...mapGetters([
-        'singer',
+        'singer', //监听singer改变
       ])
     },
     created() {

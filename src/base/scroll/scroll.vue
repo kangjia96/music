@@ -18,9 +18,17 @@
       },
       data: {
         type: Array,
-        default: null
+        default: null,
       },
       listenScroll: {
+        type: Boolean,
+        default: false
+      },
+      pullup: {
+        type: Boolean,
+        default: false,
+      },
+      beforeScroll: { //移动端检测滚动事件一开始
         type: Boolean,
         default: false
       }
@@ -45,6 +53,21 @@
           this.scroll.on('scroll', pos => {
             // console.log(pos)
             me.$emit('scroll', pos)
+          })
+        }
+
+        if (this.pullup) {
+          this.scroll.on('scrollEnd', () => {//滚动停止
+            if (this.scroll.y <= this.scroll.maxScrollY + 50) {
+              this.$emit('scrollToEnd') //表示滚动到底部
+            }
+          })
+        }
+
+        if (this.beforeScroll) {
+          this.scroll.on('beforeScrollStart', () => {
+            //移动端检测滚动事件一开始
+            this.$emit('beforeScroll')
           })
         }
       },
