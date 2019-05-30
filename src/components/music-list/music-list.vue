@@ -95,7 +95,7 @@
       },
       async selectItem(song, idx){ //选中的歌曲idx
         // debugger;
-        let list = await getPurUrl(this.songs, idx)
+        // let list = await getPurUrl(this.songs, idx)
         // let lyric = await getMLyric(song)
         // console.log(lyric)
         // 不能通过下面方式直接修改 songs 直接给store返回一个新的数组
@@ -108,7 +108,7 @@
         // })
         // console.log(song.url)
         this.selectPlay({
-          list: list, //整个歌单
+          list: this.songs, //整个歌单
           idx: idx
         })
       },

@@ -65,7 +65,7 @@
             <span class="time time-r">{{format(currentSong.duration)}}</span>
           </div>
           <div class="operators">
-            <div class="icon i-left" @click.prevent="changeMode">
+            <div class="icon i-left" @click.stop="changeMode">
               <i :class="iconMode"></i>
             </div>
             <div class="icon i-left" :class="disableCls">
@@ -78,7 +78,8 @@
               <i @click="next" class="icon-next"></i>
             </div>
             <div class="icon i-right">
-              <i class="icon-not-favorite"></i>
+              <i :class="getFavoriteIcon(currentSong)"
+                  @click="toggleFavorite(currentSong)" ></i>
             </div>
           </div>
 
@@ -107,20 +108,19 @@
     </transition>
     <PlayList ref="playlist" />
     <audio ref="audio" :src="currentSong.url"
-           @canplay="ready" @error="error"
+           @play="ready" @error="error"
            @timeupdate="updateTime" @ended="end"></audio>
   </div>
 </template>
 
 
 <script>
-  import { mapGetters, mapMutations } from 'vuex'
+  import { mapGetters, mapMutations, mapActions } from 'vuex'
   import animations from 'create-keyframe-animation'
   import { getPurUrl,  } from '../../common/js/getSongData.js'
   import ProgressBar from '../../base/progress-bar/progress-bar'
   import ProgressCircle from '../../base/progress-circle/progress-circle'
   import { playMode } from '../../common/js/config'
-  import { shuffle } from '../../common/js/util'
   import { getMLyric } from '../../common/js/getSongData'
   import Lyric from 'lyric-parser'
   import Scroll from '../../base/scroll/scroll'
@@ -236,7 +236,7 @@
         if (!this.songReady) {
           return
         }
-        if (this.mode === playMode.loop) {
+        if (this.playlist.length === 1) {
           this.loop()
           return
         }
@@ -264,7 +264,7 @@
         if (!this.songReady) {
           return
         }
-        if (this.mode === playMode.loop) {
+        if (this.playlist.length === 1) {
           this.loop()
           return
         }
@@ -289,6 +289,7 @@
       },
       ready() {
         this.songReady = true
+        this.savePlayHistory(this.currentSong)
       },
       error() { //待完善
         this.songReady = true
@@ -313,25 +314,6 @@
           //歌词跳转
           this.currentLyric.seek(currentTime * 1000)
         }
-      },
-      changeMode() { //播放模式切换
-        // console.log('old', this.sequenceList)
-        const mode = (this.mode + 1) % 3
-        this.setPlayMode(mode)
-        let list = null
-        if (mode === playMode.random) {
-          // 利用shuffle函数对列表进行打乱
-          list = shuffle(this.sequenceList)
-        } else {
-          list = this.sequenceList
-        }
-        this.resetCurrentIndex(list)
-        //对播放列表进行重置
-        this.setPlayList(list)
-      },
-      resetCurrentIndex(list) {
-        let idx = list.findIndex(it => it.id === this.currentSong.id)
-        this.setCurrentIndex(idx)
       },
       async getLyric(song) { //歌词
         try {
@@ -439,10 +421,11 @@
       },
       ...mapMutations({
         setFullScreen: 'SET_FULL_SCREEN',
-        setPlayingState: 'SET_PLAYING_STATE',
         setCurrentIndex: 'SET_CURRENT_INDEX',
-        setPlayList: 'SET_PLAYLIST',
-        setPlayMode: 'SET_PLAY_MODE'
+        setPlayingState: 'SET_PLAYING_STATE'
+      }),
+      ...mapActions({
+        savePlayHistory: 'savePlayHistory'
       })
     },
     watch: {
@@ -457,8 +440,12 @@
         // console.log(this.currentSong) //此处监听currentSong的变化进行播放歌曲
         if (this.currentLyric) { //将上首歌的歌词清空
           this.currentLyric.stop()
+          this.currentTime = 0
+          this.playingLyric = ''
+          this.currentLineNum = 0
         }
-        setTimeout(() => {//dom异常 在调用dom的时候 src还没有ready 又去调用所以产生异常 所以进行异步处理  下同
+        clearTimeout(this.timer) //防止快速切歌  需要把上次的活动清除
+        this.timer = setTimeout(() => {//dom异常 在调用dom的时候 src还没有ready 又去调用所以产生异常 所以进行异步处理  下同
           this.getLyric(this.currentSong) //后去当前歌词
           this.$refs.audio.play()
         }, 1000)

@@ -37,6 +37,9 @@ export async function getPurUrl (playlist, idx) {
 
 export async function getMLyric(song) {
   return await getMusicLyric(song.mid).then(res => {
+    // if (song.lyric !== res) {
+    //   return
+    // }
     if (res.code === ERR_OK) {
       let lyric = Base64.decode(res.lyric)
       // console.log(lyric)

@@ -5,20 +5,20 @@
         <!-- 仅仅阻止冒泡 -->
         <div class="list-header">
           <h1 class="title">
-            <i class="icon"></i>
-            <span class="text"></span>
+            <i class="icon" :class="iconMode" @click.stop="changeMode"></i>
+            <span class="text" v-html="modeText"></span>
             <span class="clear" @click.stop="showConfirm">
               <i class="icon-clear"></i>
             </span>
           </h1>
         </div>
-        <Scroll class="list-content" ref="listContent" :data="sequenceList">
+        <Scroll class="list-content" ref="listContent" :refreshDelay="refreshDelay" :data="sequenceList">
           <transition-group name="list" tag="ul">
-            <li ref="listItem" class="item" v-for="(item, idx) of sequenceList" :key="item.id" @click="selectItem(item, idx)">
+            <li ref="listItem" class="item" v-for="(item, idx) of sequenceList" :key="idx" @click="selectItem(item, idx)">
               <i class="current" :class="getCurrentIcon(item)"></i>
               <span class="text">{{item.name}}</span>
-              <span class="like" >
-                <i class="icon-not-favorite"></i>
+              <span class="like" @click.stop="toggleFavorite(item)" >
+                <i :class="getFavoriteIcon(item)"></i>
               </span>
               <span class="delete" ref="delete" @click.stop="deleteOne(item)">
                 <i class="icon-delete"></i>
@@ -27,7 +27,7 @@
           </transition-group>
         </Scroll>
         <div class="list-operate">
-          <div class="add">
+          <div class="add" @click="addSong">
             <i class="icon-add"></i>
             <span class="text">添加歌曲到队列</span>
           </div>
@@ -37,31 +37,37 @@
         </div>
       </div>
       <Confirm @confirm="confirmClear" ref="confirm" text="是否清空此列表" confirmBtnText="清空" />
+      <AddSong ref="addsong"  />
     </div>
   </transition>
 </template>
 
 <script>
-  import { mapGetters, mapMutations, mapActions } from 'vuex';
+  import { mapActions } from 'vuex';
   import Scroll from '../../base/scroll/scroll'
   import { playMode } from '../../common/js/config'
   import Confirm from '../../base/confirm/confirm'
   import { playerMixin } from '../../common/js/mixin'
+  import AddSong from '../add-song/add-song'
 
   export default {
     mixins: [playerMixin],
     data() {
       return {
         showFlag: false,
+        refreshDelay: 100, //需要重新传递refresh的刷新时间 强制其刷新
       }
     },
     computed: {
-      ...mapGetters([
-        'sequenceList',
-        'currentSong',
-        'playlist',
-        'mode'
-      ])
+      modeText() {
+        if (playMode.random === this.mode) {
+          return '随机播放'
+        } else if (playMode.loop === this.mode) {
+          return '单曲循环'
+        } else {
+          return '顺序播放'
+        }
+      }
     },
     methods: {
       showConfirm() {
@@ -91,28 +97,30 @@
         }
       },
       selectItem(item,idx) {
-        if (this.mode === playMode.random) {
-          idx = this.playlist.findIndex(song => song.id = item.id)
-        }
-        // console.log(this.playlist, idx)
+        console.log(item, idx)
+        // if (this.mode === playMode.random) {
+        //   idx = this.playlist.findIndex(song => song.id = item.id)
+        //   console.log(this.playlist, idx)
+        // }
+        let index = this.sequenceList.findIndex(song => song.id === item.id)
         this.selectPlay({
-          list: this.playlist,
-          idx: idx,
+          list: this.sequenceList,
+          idx: index,
           Boolean: true,
         })
       },
       scrollToCurrent(current) {
+        //渲染的是最近播放列表 所以需要在最近播放列表中找下标
         const idx = this.sequenceList.findIndex(song => current.id === song.id)
-        this.$refs.listContent.scrollToElement(this.$refs.listItem[idx], 300)
+        this.$refs.listContent.scrollToElement(this.$refs.listItem[idx - 1], 300)
       },
       confirmClear() {
         this.deleteSongList()
         this.hide()
       },
-      ...mapMutations({
-        'setCurrentIndex': 'SET_CURRENT_INDEX',
-        'setPlayingState': 'SET_PLAYING_STATE'
-      }),
+      addSong() {
+        this.$refs.addsong.show()
+      },
       ...mapActions([
         'selectPlay',
         'deleteSong',
@@ -121,16 +129,20 @@
     },
     watch: {
       currentSong(newSong, oldSong) {
-        if (!this.showFlag || newSong.id === oldSong.id) {
+        if (!this.showFlag) {
           return
-        } else {
-          this.scrollToCurrent(newSong)
         }
+        // console.log
+        // if (newSong.id === oldSong.id) {
+        //   return
+        // }
+        this.scrollToCurrent(newSong)
       }
     },
     components: {
       Scroll,
-      Confirm
+      Confirm,
+      AddSong
     }
   }
 </script>

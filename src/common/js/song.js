@@ -22,6 +22,10 @@ export function filterSinger(singer) {
     return ''
   }
 
+  if (typeof singer === 'string') {
+    return singer
+  }
+
   singer.forEach((singer) => {
     res.push(singer.name)
   })
@@ -40,19 +44,32 @@ export function filterSinger(singer) {
 //   })
 
 // }
+function filterImage(image) {
+  if (image.length > 20) {
+    console.log(image)
+    return image
+  } else {
+    return `https://y.gtimg.cn/music/photo_new/T002R300x300M000${image}.jpg?max_age=2592000`
+  }
+}
 
-export function createSong(musicData) { //获取歌曲资料
-  return new Song({
-    id: musicData.songid,
-    mid: musicData.songmid,
-    singer: filterSinger(musicData.singer),
-    name: musicData.songname,
-    album: musicData.albumname,
-    duration: musicData.interval,
-    url: '',
-    image: `https://y.gtimg.cn/music/photo_new/T002R300x300M000${musicData.albummid}.jpg?max_age=2592000`,
-    lyric: '',
-  })
+export function createSong(musicData, Boolean) { //获取歌曲资料
+  if (Boolean == true) {
+    return musicData
+  } else {
+    return new Song({
+      id: musicData.songid,
+      mid: musicData.songmid,
+      singer: filterSinger(musicData.singer),
+      name: musicData.songname,
+      album: musicData.albumname,
+      duration: musicData.interval,
+      url: musicData.url ? musicData.url : '',
+      image: filterImage(musicData.albummid),
+      lyric: '',
+    })
+
+  }
 }
 
 

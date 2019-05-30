@@ -7,7 +7,7 @@ import createLogger from 'vuex/dist/logger'
 import { playMode } from '../common/js/config'
 import { shuffle, findSongIndex } from '../common/js/util'
 import { getPurUrl } from '../common/js/getSongData'
-import { saveSearch, loadSearch, deleteSearch, clearSearch } from '../common/js/cache'
+import { saveSearch, loadSearch, deleteSearch, clearSearch, savePlay, loadPlay, loadFavorite, saveFavorite, deleteFavorite } from '../common/js/cache'
 
 Vue.use(Vuex)
 
@@ -25,6 +25,8 @@ export default new Vuex.Store({
     disc: {},
     topList: {},
     searchHistory: loadSearch(),
+    playHistory: loadPlay(),
+    favoriteList: loadFavorite()
   },
 
   getters: {
@@ -39,6 +41,8 @@ export default new Vuex.Store({
     disc: state => state.disc,
     topList: state => state.topList,
     searchHistory: state => state.searchHistory,
+    playHistory: state => state.playHistory,
+    favoriteList: state => state.favoriteList,
   },
 
   mutations: {
@@ -61,8 +65,6 @@ export default new Vuex.Store({
       state.mode = mode
     },
     [types.SET_CURRENT_INDEX] (state, idx) {
-      // getPurUrl(this.playlist, idx)
-      // state.playlist = randomPlayList
       state.currentIndex = idx
     },
     [types.SET_DISC] (state, disc) {
@@ -73,13 +75,18 @@ export default new Vuex.Store({
     },
     [types.SET_SEARCH_HISTORY] (state, history) {
       state.searchHistory = history
+    },
+    [types.SET_PLAY_HISTORY] (state, history) {
+      state.playHistory = history
+    },
+    [types.SET_FAVORITE_LIST] (state, list) {
+      state.favoriteList = list
     }
   },
 
   actions: {
-    selectPlay: async function({commit, state}, {list, idx, Boolean}){
-      // console.log(idx)
-      commit(types.SET_SEQUENCE_LIST, list)
+    selectPlay: async function({commit, state}, {list, idx}){
+      commit(types.SET_SEQUENCE_LIST, list.slice())
       if (state.mode === playMode.random) {
         // debugger;
         let randomlist = shuffle(list)
@@ -93,11 +100,13 @@ export default new Vuex.Store({
         commit(types.SET_PLAYLIST, PlayList)
       }
       commit(types.SET_CURRENT_INDEX, idx)
-      !Boolean ? commit(types.SET_FULL_SCREEN, true) : ''
+      commit(types.SET_FULL_SCREEN, true)
       commit(types.SET_PLAYING_STATE, true)
 
     },
     randomPlay: async function({commit}, {list}) {
+      // if (!Boolean) {
+      // }
       commit(types.SET_PLAY_MODE, playMode.random)
       commit(types.SET_SEQUENCE_LIST, list)
       let randomlist = shuffle(list)
@@ -183,12 +192,20 @@ export default new Vuex.Store({
      const playingState = playlist.length > 0
      commit(types.SET_PLAYING_STATE, playingState)
     },
-
     deleteSongList: function ({commit}) {
       commit(types.SET_PLAYLIST, [])
       commit(types.SET_SEQUENCE_LIST, [])
       commit(types.SET_CURRENT_INDEX, -1)
       commit(types.SET_PLAYING_STATE, false)
+    },
+    savePlayHistory: function ({commit}, song) {
+      commit(types.SET_PLAY_HISTORY, savePlay(song))
+    },
+    saveFavoriteList: function({commit}, song) {
+      commit(types.SET_FAVORITE_LIST, saveFavorite(song))
+    },
+    deleteFavoriteList: function ({commit}, song) {
+      commit(types.SET_FAVORITE_LIST, deleteFavorite(song))
     }
   },
 

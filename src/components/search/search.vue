@@ -42,21 +42,20 @@
   import { getHotKey } from '../../api/search'
   import { ERR_OK } from '../../api/config';
   import Suggest from '../suggest/suggest'
-  import { mapActions, mapGetters } from 'vuex';
+  import { mapActions } from 'vuex';
   import SearchList from '../../base/search-list/search-list'
   import Confirm from '../../base/confirm/confirm'
   import Scroll from '../../base/scroll/scroll'
-  import { playlistMixin } from '../../common/js/mixin'
+  import { playlistMixin, searchMixin } from '../../common/js/mixin'
 
   export default {
-    mixins: [playlistMixin],
+    mixins: [playlistMixin, searchMixin],
     created() { //组件被渲染之后 请求热点数据
       this._getHotKey()
     },
     data() {
       return {
         hotKey: [],
-        query: ''
       }
     },
     computed: {
@@ -64,34 +63,14 @@
         console.log('run')
         return this.hotKey.concat(this.searchHistory).slice()
       },
-      ...mapGetters([
-        'searchHistory',
-      ])
     },
     methods: {
-       handlePlaylist(playlist) {
+      handlePlaylist(playlist) {
         const bottom = playlist.length > 0 ? '60px' : ''
         this.$refs.shortcutWrapper.style.bottom = bottom
         this.$refs.scroll.refresh()
         this.$refs.searchResult.style.bottom = bottom
         this.$refs.suggest.refresh()
-      },
-      onQueryChange(query) { //监听search输入框的输入文字改变事件
-        // console.log('run123')
-        this.query = query
-      },
-      addQuery(query) {
-        //调用组件暴露的函数 向输入框中填入关键词
-        // console.log(this.$refs.searchBox)
-        this.$refs.searchBox.setQuery(query)
-      },
-      blurInput() {//滑动之前将移动端键盘收起
-        this.$refs.searchBox.blur()
-      },
-      saveSearch() {
-        // console.log('run')
-        //本地缓存选中的Key
-        this.saveSearchHistory(this.query)
       },
       showConfirm() {
         this.$refs.confirm.show()
@@ -104,8 +83,6 @@
         })
       },
       ...mapActions([
-        'saveSearchHistory',
-        'deleteSearchHistory',
         'clearSearchHistoty'
       ])
     },

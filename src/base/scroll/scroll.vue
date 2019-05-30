@@ -31,6 +31,10 @@
       beforeScroll: { //移动端检测滚动事件一开始
         type: Boolean,
         default: false
+      },
+      refreshDelay: {
+        type: Number,
+        default: 20
       }
     },
     mounted() {
@@ -92,7 +96,7 @@
       data() {
         setTimeout(() => {
           this.refresh()
-        }, 20);
+        }, this.refreshDelay);
       }
     }
 

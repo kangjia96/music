@@ -1,7 +1,7 @@
 <template>
   <div class="song-list">
     <ul>
-      <li @click="selectItem(song, idx)" :key="song.mid" v-for="(song, idx) in songs" class="item">
+      <li @click="selectItem(song, idx)" :key="idx" v-for="(song, idx) in songs" class="item">
         <div class="rank" v-show="rank">
           <span :class="getRankCls(idx)" v-text="getRankText(idx)"></span>
         </div>
@@ -31,6 +31,7 @@
     },
     methods: {
       selectItem(song, idx){ //选中的歌曲传递下标
+        // console.log('run')
         this.$emit('select', song, idx)
       },
       getDesc(song) {
